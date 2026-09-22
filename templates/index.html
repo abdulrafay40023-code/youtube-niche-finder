@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>YouTube Faceless Niche Finder</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#080808;color:#fff;font-family:'Segoe UI',sans-serif}
+
+/* HEADER */
+.hdr{background:#0f0f0f;border-bottom:1px solid #1f1f1f;padding:16px 22px;display:flex;align-items:center;gap:14px}
+.hdr-logo{font-size:2rem}
+.hdr h1{font-size:1.35rem;font-weight:800;color:#fff}
+.hdr p{font-size:0.72rem;color:#555;margin-top:2px}
+
+/* HOME PAGE */
+.home{padding:24px 22px;max-width:1280px;margin:0 auto}
+.home-title{text-align:center;margin-bottom:28px}
+.home-title h2{font-size:1.6rem;font-weight:800;margin-bottom:8px}
+.home-title h2 span{color:#ff4444}
+.home-title p{color:#444;font-size:0.85rem}
+
+/* BIG SCAN BUTTON */
+.btn-big{display:block;width:fit-content;margin:0 auto 32px;background:linear-gradient(135deg,#cc0000,#880000);color:#fff;border:none;padding:16px 48px;border-radius:50px;font-size:1.1rem;font-weight:800;cursor:pointer;box-shadow:0 6px 28px rgba(200,0,0,0.45);transition:all 0.3s}
+.btn-big:hover{transform:translateY(-3px);box-shadow:0 10px 36px rgba(200,0,0,0.6)}
+.btn-big:disabled{opacity:0.45;cursor:not-allowed;transform:none}
+
+/* SEARCH */
+.search-row{display:flex;gap:10px;max-width:560px;margin:0 auto 32px}
+.search-row input{flex:1;background:#141414;border:1.5px solid #252525;color:#fff;padding:11px 16px;border-radius:8px;font-size:0.88rem;outline:none}
+.search-row input:focus{border-color:#cc3333}
+.search-row input::placeholder{color:#333}
+.btn-srch{background:#cc0000;color:#fff;border:none;padding:11px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:0.85rem;white-space:nowrap}
+
+/* NICHE GRID (home) */
+.niche-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:12px;margin-bottom:16px}
+.nc{background:#111;border:1px solid #1e1e1e;border-radius:12px;padding:18px 16px 14px;cursor:pointer;transition:all 0.22s;position:relative;overflow:hidden}
+.nc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.nc:hover{transform:translateY(-3px);border-color:#333}
+.nc .icon{font-size:2rem;margin-bottom:10px;display:block}
+.nc .nm{font-size:0.87rem;font-weight:700;margin-bottom:4px}
+.nc .ds{font-size:0.68rem;color:#555;line-height:1.4}
+.nc .scan-btn{display:block;margin-top:10px;background:rgba(255,255,255,0.06);border:1px solid #2a2a2a;color:#888;padding:5px 10px;border-radius:6px;font-size:0.72rem;text-align:center;transition:all 0.2s}
+.nc:hover .scan-btn{background:rgba(200,0,0,0.15);border-color:#cc3333;color:#ff6666}
+
+/* LOADING OVERLAY */
+#overlay{display:none;position:fixed;inset:0;background:rgba(8,8,8,0.97);z-index:999;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}
+#overlay.on{display:flex}
+.spin{width:54px;height:54px;border:5px solid #1a1a1a;border-top:5px solid #cc0000;border-radius:50%;animation:sp 0.8s linear infinite;margin-bottom:22px}
+@keyframes sp{to{transform:rotate(360deg)}}
+#overlay h2{font-size:1.3rem;margin-bottom:8px}
+#overlay p{color:#555;font-size:0.85rem;max-width:400px;line-height:1.6}
+
+/* RESULTS PAGE */
+.results-pg{display:none;padding:20px 22px;max-width:1280px;margin:0 auto}
+
+/* BACK BUTTON */
+.back-btn{background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa;padding:8px 18px;border-radius:7px;cursor:pointer;font-size:0.82rem;margin-bottom:20px;display:inline-flex;align-items:center;gap:8px}
+.back-btn:hover{background:#252525;color:#fff}
+
+/* STATS ROW */
+.stats-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.stat{background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:12px 18px;min-width:120px}
+.stat .v{font-size:1.2rem;font-weight:800;color:#ff4444}
+.stat .l{font-size:0.62rem;color:#444;margin-top:2px}
+
+/* COMPETITION BADGE */
+.comp-box{border-radius:10px;padding:16px 20px;margin-bottom:22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.comp-level{font-size:1.5rem;font-weight:900;padding:4px 16px;border-radius:8px}
+.comp-msg{font-size:0.85rem;color:#ccc;flex:1}
+.start-advice{background:#0d1a0d;border:1px solid #1a3a1a;border-radius:10px;padding:14px 18px;margin-bottom:22px}
+.start-advice h4{color:#44dd66;font-size:0.85rem;margin-bottom:6px}
+.start-advice p{color:#88bb88;font-size:0.8rem;line-height:1.6}
+
+/* SECTION HEADER */
+.sec-hd{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #151515}
+.sec-hd h3{font-size:1rem;font-weight:700}
+.cnt-badge{background:#cc0000;color:#fff;padding:2px 10px;border-radius:20px;font-size:0.7rem}
+.filter-pills{margin-left:auto;display:flex;gap:6px}
+.fpill{background:#1a1a1a;border:1px solid #252525;color:#777;padding:3px 12px;border-radius:20px;font-size:0.72rem;cursor:pointer}
+.fpill.on{background:#cc0000;border-color:#cc0000;color:#fff}
+
+/* CHANNEL GRID */
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:11px;margin-bottom:30px}
+
+/* CHANNEL CARD */
+.cc{background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:14px;transition:all 0.2s;position:relative;overflow:hidden}
+.cc:hover{border-color:#333;transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.5)}
+.cc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+
+.cc-top{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.thumb{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid #333;flex-shrink:0}
+.ava{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;flex-shrink:0;color:#fff}
+.cname{font-size:0.88rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+.cage{font-size:0.62rem;color:#444;margin-top:2px}
+
+.month-pill{position:absolute;top:10px;right:10px;background:rgba(255,140,0,0.1);border:1px solid rgba(255,140,0,0.25);color:#cc8800;padding:1px 7px;border-radius:20px;font-size:0.6rem;font-weight:700}
+.niche-pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:0.62rem;margin-bottom:8px;font-weight:600}
+
+.cdesc{font-size:0.73rem;color:#555;line-height:1.5;min-height:28px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin-bottom:10px}
+
+.cstats{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:8px}
+.cs{background:#0c0c0c;border-radius:6px;padding:5px 3px;text-align:center}
+.cs .v{font-size:0.78rem;font-weight:700;color:#ff4444}
+.cs .l{font-size:0.56rem;color:#333}
+
+.gbar{background:#0c0c0c;height:3px;border-radius:3px;overflow:hidden;margin-bottom:2px}
+.gfill{height:100%;border-radius:3px;transition:width 1.2s}
+.gscore{font-size:0.58rem;color:#2a2a2a;text-align:right;margin-bottom:8px}
+
+.ch-link{display:block;background:#0c0c0c;border:1px solid #1e1e1e;color:#777;padding:7px;border-radius:6px;text-align:center;text-decoration:none;font-size:0.77rem;font-weight:600;transition:all 0.2s}
+.ch-link:hover{background:#cc0000;border-color:#cc0000;color:#fff}
+
+/* EMPTY */
+.empty{text-align:center;padding:50px;color:#2a2a2a}
+.empty p{font-size:0.88rem;line-height:1.8}
+
+/* NICHE SECTIONS */
+.niche-sec{margin-bottom:36px}
+.niche-sec-hd{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px 16px;border-radius:10px;border-left:3px solid}
+.niche-sec-hd h3{font-size:0.95rem;font-weight:700}
+.niche-sec-hd .comp{margin-left:auto;font-size:0.75rem;font-weight:700;padding:3px 12px;border-radius:20px}
+</style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div id="overlay">
+    <div class="spin"></div>
+    <h2 id="ovTitle">Channels scan ho rahi hain...</h2>
+    <p id="ovMsg">2026 ke faceless animation channels filter ho rahay hain — thoda wait karo</p>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+    <div class="hdr-logo">&#128293;</div>
+    <div>
+        <h1>YouTube Faceless Niche Finder</h1>
+        <p>2026 ke cartoon · animation · story · documentary channels + competition analysis</p>
+    </div>
+</div>
+
+<!-- HOME -->
+<div class="home" id="homePg">
+    <div class="home-title">
+        <h2>Faceless <span>Trending</span> Channels Dhundo</h2>
+        <p>Scan karo — 2026 ke best performing faceless channels + aapke liye competition analysis</p>
+    </div>
+
+    <button class="btn-big" id="scanAllBtn" onclick="scanAll()">
+        &#128269;&nbsp;&nbsp;Scan Karo — Sab Niches
+    </button>
+
+    <div class="search-row">
+        <input type="text" id="sq" placeholder="Ya custom search: 'stickman', 'horror animation'..." onkeypress="if(event.key==='Enter')doSearch()">
+        <button class="btn-srch" onclick="doSearch()">Search</button>
+    </div>
+
+    <div class="niche-grid">
+        {% for n in niches %}
+        <div class="nc" onclick="scanNiche('{{n.id}}')" style="border-top:3px solid {{n.color}}">
+            <span class="icon">{{n.icon}}</span>
+            <div class="nm">{{n.name}}</div>
+            <div class="ds">{{n.desc}}</div>
+            <span class="scan-btn">&#128269; Scan this niche</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- RESULTS PAGE -->
+<div class="results-pg" id="resultsPg">
+    <button class="back-btn" onclick="goHome()">&#8592; Back</button>
+
+    <!-- ★ PERSONAL MASHVARA BOX ★ -->
+    <div id="mashvaraBox" style="display:none;background:linear-gradient(135deg,#0a1f0a,#0d2a0d);border:2px solid #22aa44;border-radius:14px;padding:20px 22px;margin-bottom:22px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;right:0;width:120px;height:120px;background:radial-gradient(circle,rgba(34,170,68,0.15),transparent);pointer-events:none"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <span style="font-size:1.6rem">&#128161;</span>
+            <div>
+                <div style="font-size:0.7rem;color:#44aa66;font-weight:700;text-transform:uppercase;letter-spacing:1px">Hamara Personal Mashvara — Aapke Liye</div>
+                <div style="font-size:1.1rem;font-weight:800;color:#fff;margin-top:2px" id="mvNiche">—</div>
+            </div>
+            <div id="mvBadge" style="margin-left:auto;padding:4px 14px;border-radius:20px;font-size:0.78rem;font-weight:800;background:#22aa4422;border:1px solid #22aa44;color:#44dd66">&#10003; Start Karo</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:14px">
+            <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px 14px">
+                <div style="font-size:0.65rem;color:#448844;margin-bottom:4px;text-transform:uppercase">Competition</div>
+                <div style="font-size:0.9rem;font-weight:700" id="mvComp">—</div>
+            </div>
+            <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px 14px">
+                <div style="font-size:0.65rem;color:#448844;margin-bottom:4px;text-transform:uppercase">Channels Mili (2026)</div>
+                <div style="font-size:0.9rem;font-weight:700" id="mvCount">—</div>
+            </div>
+            <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px 14px">
+                <div style="font-size:0.65rem;color:#448844;margin-bottom:4px;text-transform:uppercase">Kyun Best Hai?</div>
+                <div style="font-size:0.9rem;font-weight:700" id="mvWhy">—</div>
+            </div>
+        </div>
+        <div style="background:rgba(0,0,0,0.25);border-radius:8px;padding:12px 14px">
+            <div style="font-size:0.65rem;color:#44aa66;margin-bottom:5px;text-transform:uppercase;font-weight:700">&#128640; Kaise Start Karo</div>
+            <div style="font-size:0.8rem;color:#aaddaa;line-height:1.7" id="mvAdvice">—</div>
+        </div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat"><div class="v" id="rTotal">0</div><div class="l">Channels Found</div></div>
+        <div class="stat"><div class="v" id="rPeriod">2026</div><div class="l">Year Filter</div></div>
+        <div class="stat"><div class="v" id="rTop">-</div><div class="l">Top Channel Subs</div></div>
+    </div>
+
+    <!-- Competition & Advice (single niche) -->
+    <div id="singleInfo" style="display:none">
+        <div class="comp-box" id="compBox">
+            <div class="comp-level" id="compLevel">-</div>
+            <div class="comp-msg" id="compMsg">-</div>
+        </div>
+        <div class="start-advice" id="adviceBox">
+            <h4>&#128161; Aapko Kaise Start Karna Chahiye?</h4>
+            <p id="adviceTxt">-</p>
+        </div>
+    </div>
+
+    <!-- Filter pills (all scan) -->
+    <div id="filterRow" style="display:none;margin-bottom:20px;display:flex;gap:8px;flex-wrap:wrap"></div>
+
+    <!-- Results content -->
+    <div id="resultsContent"></div>
+</div>
+
+<script>
+function fmt(n){
+    if(n>=1e6) return (n/1e6).toFixed(1)+'M';
+    if(n>=1000) return (n/1000).toFixed(1)+'K';
+    return n+'';
+}
+
+// ── REAL DATA-DRIVEN MASHVARA ─────────────────────────────────────────────
+function showMashvara(by_niche){
+    if(!by_niche || !by_niche.length) return;
+
+    const withChannels = by_niche.filter(n => n.channels && n.channels.length > 0);
+    if(!withChannels.length) return;
+
+    // Score each niche: lower avg subs = less competition = better for new channels
+    const order = {'Low':0,'Medium':1,'High':2,'Unknown':3};
+    const scored = withChannels.map(n => {
+        const avgSubs = n.channels.reduce((a,c) => a + c.subs, 0) / n.channels.length;
+        const maxSubs = Math.max(...n.channels.map(c => c.subs));
+        const compScore = order[n.competition.level] ?? 2;
+        return { ...n, avgSubs, maxSubs, compScore };
+    }).sort((a,b) => a.compScore - b.compScore || a.avgSubs - b.avgSubs);
+
+    const best = scored[0];
+    const avgSubs = Math.round(best.avgSubs);
+    const maxSubs = best.maxSubs;
+
+    // Real advice strings
+    const levelMsg = {
+        'Low':    `Sirf ${best.channels.length} channels mili hain 2026 mein — competition bilkul kum hai. Abhi start karo!`,
+        'Medium': `${best.channels.length} channels hain lekin sab bari nahi — average ${fmt(avgSubs)} subs. Abhi bhi moka hai.`,
+        'High':   `Competition zyada hai lekin niche itna bada hai ke naye channels bhi chal jaate hain.`,
+    };
+
+    document.getElementById('mvNiche').textContent  = best.icon + '  ' + best.name;
+    document.getElementById('mvComp').innerHTML     =
+        `<span style="color:${best.competition.color};font-weight:800">${best.competition.level} Competition</span>`;
+    document.getElementById('mvCount').textContent  =
+        `${best.channels.length} channels mili | Avg subs: ${fmt(avgSubs)} | Top: ${fmt(maxSubs)}`;
+    document.getElementById('mvWhy').textContent    = levelMsg[best.competition.level] || '';
+    document.getElementById('mvAdvice').textContent = best.advice;
+    document.getElementById('mashvaraBox').style.display = 'block';
+}
+
+
+function card(ch){
+    const init = (ch.title||'Y')[0].toUpperCase();
+    const sc = Math.min(ch.growth_score||0,100);
+    const col = ch.niche_color||'#cc0000';
+    return `
+    <div class="cc" style="">
+        <div class="cc::after" style="background:${col}"></div>
+        <span class="month-pill">${ch.month} 2026</span>
+        <div class="cc-top">
+            ${ch.thumbnail?`<img src="${ch.thumbnail}" class="thumb" onerror="this.style.display='none';this.nextSibling.style.display='flex'" alt="">`:''}
+            <div class="ava" style="background:${col}88;display:${ch.thumbnail?'none':'flex'}">${init}</div>
+            <div style="overflow:hidden;flex:1">
+                <div class="cname" title="${ch.title}">${ch.title}</div>
+                <div class="cage">${ch.days_old}d old${ch.country?' &bull; '+ch.country:''}</div>
+            </div>
+        </div>
+        <span class="niche-pill" style="background:${col}18;border:1px solid ${col}33;color:${col}">${ch.niche_icon} ${ch.niche}</span>
+        <div class="cdesc">${ch.description||'No description'}</div>
+        <div class="cstats">
+            <div class="cs"><div class="v">${ch.subs_fmt}</div><div class="l">Subscribers</div></div>
+            <div class="cs"><div class="v">${ch.views_fmt}</div><div class="l">Views</div></div>
+            <div class="cs"><div class="v">${ch.videos}</div><div class="l">Videos</div></div>
+        </div>
+        <div class="gbar"><div class="gfill" style="width:${sc}%;background:linear-gradient(90deg,${col},#ff8800)"></div></div>
+        <div class="gscore">Growth: ${sc}/100</div>
+        <a href="${ch.url}" target="_blank" class="ch-link" onclick="event.stopPropagation()">&#9654; Channel Kholo</a>
+    </div>`;
+}
+
+function showOverlay(title, msg){
+    document.getElementById('ovTitle').textContent = title;
+    document.getElementById('ovMsg').textContent = msg;
+    document.getElementById('overlay').classList.add('on');
+}
+function hideOverlay(){ document.getElementById('overlay').classList.remove('on'); }
+
+function goHome(){
+    document.getElementById('homePg').style.display='block';
+    document.getElementById('resultsPg').style.display='none';
+}
+function showResults(){
+    document.getElementById('homePg').style.display='none';
+    document.getElementById('resultsPg').style.display='block';
+    window.scrollTo(0,0);
+}
+
+async function scanAll(){
+    const btn = document.getElementById('scanAllBtn');
+    btn.disabled=true; btn.textContent='Scanning...';
+    showOverlay('Sab 10 Niches Scan Ho Rahi Hain...','2026 ke faceless animation, stickman, horror, cartoon, documentary channels — filter ho rahay hain');
+
+    try{
+        const r = await fetch('/api/scan-all');
+        const d = await r.json();
+        hideOverlay();
+
+        document.getElementById('rTotal').textContent = d.total;
+        document.getElementById('rTop').textContent = d.channels.length ? d.channels[0].subs_fmt : '-';
+        document.getElementById('singleInfo').style.display='none';
+        showMashvara(d.by_niche);
+
+        // Filter pills
+        const fr = document.getElementById('filterRow');
+        fr.style.display='flex';
+        fr.innerHTML='<button class="fpill on" onclick="filterSec(\'all\',this)">All</button>';
+        (d.by_niche||[]).forEach(n=>{
+            if(!n.channels.length) return;
+            const p=document.createElement('button');
+            p.className='fpill';
+            p.textContent=n.icon+' '+n.name.split(' ').slice(0,2).join(' ')+' ('+n.channels.length+')';
+            p.onclick=()=>filterSec(n.id,p);
+            fr.appendChild(p);
+        });
+
+        // Content
+        const rc = document.getElementById('resultsContent');
+        rc.innerHTML='';
+
+        // Top overall
+        if(d.channels.length){
+            rc.innerHTML+=`<div class="niche-sec" id="all-top">
+                <div class="sec-hd"><h3>&#127942; Top Growing Channels — Sab Niches</h3><span class="cnt-badge">${d.total}</span></div>
+                <div class="ch-grid">${d.channels.slice(0,24).map(card).join('')}</div>
+            </div>`;
+        }
+
+        // By niche
+        (d.by_niche||[]).forEach(n=>{
+            if(!n.channels.length) return;
+            const compClr = n.competition.color;
+            rc.innerHTML+=`<div class="niche-sec" id="sec-${n.id}">
+                <div class="niche-sec-hd" style="background:${n.color}0d;border-left-color:${n.color}">
+                    <span style="font-size:1.3rem">${n.icon}</span>
+                    <h3>${n.name}</h3>
+                    <span class="cnt-badge" style="background:${n.color}">${n.channels.length}</span>
+                    <span class="comp" style="background:${compClr}18;border:1px solid ${compClr}33;color:${compClr}">
+                        ${n.competition.level} Competition
+                    </span>
+                </div>
+                <div style="background:#0d1a0d;border:1px solid #1a3a1a;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.75rem;color:#88bb88;line-height:1.6">
+                    <b style="color:#44dd66">Start Kaise Karo:</b> ${n.advice}
+                </div>
+                <div class="ch-grid">${n.channels.map(card).join('')}</div>
+            </div>`;
+        });
+
+        if(!d.total){
+            rc.innerHTML='<div class="empty"><p>2026 ke koi faceless channels nahi mile.<br>Thodi der baad dobara try karo ya custom search use karo.</p></div>';
+        }
+
+        saveToLS(d);
+
+        showResults();
+    }catch(e){
+        hideOverlay();
+        alert('Error: '+e.message);
+    }
+    btn.disabled=false; btn.textContent='&#128269;  Scan Karo — Sab Niches';
+}
+
+async function scanNiche(id){
+    showOverlay('Scanning...','2026 ke channels filter ho rahay hain');
+    try{
+        const r = await fetch('/api/scan-niche?id='+id);
+        const d = await r.json();
+        hideOverlay();
+        if(d.error){alert(d.error);return;}
+
+        document.getElementById('rTotal').textContent = d.total;
+        document.getElementById('rTop').textContent = d.channels.length ? d.channels[0].subs_fmt : '-';
+        document.getElementById('filterRow').style.display='none';
+
+        // Competition
+        const si = document.getElementById('singleInfo');
+        si.style.display='block';
+        const cl = document.getElementById('compLevel');
+        cl.textContent = d.competition.level+' Competition';
+        cl.style.background = d.competition.color+'22';
+        cl.style.color = d.competition.color;
+        document.getElementById('compMsg').textContent = d.competition.msg;
+        document.getElementById('adviceTxt').textContent = d.advice;
+
+        // Channels
+        const rc = document.getElementById('resultsContent');
+        rc.innerHTML=`<div class="sec-hd"><h3>${d.icon} ${d.niche}</h3><span class="cnt-badge">${d.total} channels</span></div>
+        <div class="ch-grid">${d.channels.map(card).join('')||'<div class="empty"><p>2026 ke koi channels nahi mile is niche mein.<br>Keywords se custom search try karo.</p></div>'}</div>`;
+
+        showResults();
+    }catch(e){hideOverlay();alert('Error: '+e.message);}
+}
+
+async function doSearch(){
+    const q = document.getElementById('sq').value.trim();
+    if(!q) return;
+    showOverlay('"'+q+'" search ho raha hai...','2026 ke channels filter ho rahay hain');
+    try{
+        const r = await fetch('/api/search?q='+encodeURIComponent(q));
+        const d = await r.json();
+        hideOverlay();
+        if(d.error){alert(d.error);return;}
+
+        document.getElementById('rTotal').textContent = d.total;
+        document.getElementById('rTop').textContent = d.channels.length ? d.channels[0].subs_fmt : '-';
+        document.getElementById('singleInfo').style.display='none';
+        document.getElementById('filterRow').style.display='none';
+
+        const rc = document.getElementById('resultsContent');
+        rc.innerHTML=`<div class="sec-hd"><h3>Search: "${q}"</h3><span class="cnt-badge">${d.total}</span></div>
+        <div class="ch-grid">${d.channels.map(card).join('')||'<div class="empty"><p>Koi channel nahi mila.</p></div>'}</div>`;
+        showResults();
+    }catch(e){hideOverlay();alert('Error: '+e.message);}
+}
+
+function filterSec(id, el){
+    document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('on'));
+    el.classList.add('on');
+    document.querySelectorAll('.niche-sec').forEach(s=>{
+        s.style.display = (id==='all'||s.id==='sec-'+id||s.id==='all-top') ? '' : 'none';
+    });
+    if(id!=='all') document.getElementById('sec-'+id)?.scrollIntoView({behavior:'smooth'});
+}
+
+// ── LOCALSTORAGE: Save results so new tabs also get them ─────────────────
+const LS_KEY = 'ynf_saved';
+
+function saveToLS(data){
+    if(!data || !data.total || data.total === 0) return; // don't save empty results
+    try { localStorage.setItem(LS_KEY, JSON.stringify({data, ts: Date.now()})); } catch(e){}
+    showSavedToast();
+}
+
+function showSavedToast(){
+    let t = document.getElementById('_toast');
+    if(!t){
+        t = document.createElement('div');
+        t.id = '_toast';
+        t.style.cssText = 'position:fixed;bottom:18px;right:18px;background:#0d1a0d;border:1px solid #1a4a1a;color:#44dd66;padding:10px 18px;border-radius:9px;font-size:0.78rem;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.5)';
+        document.body.appendChild(t);
+    }
+    t.textContent = '✓ Results save ho gaye — naye tab mein bhi milenge!';
+    t.style.display = 'block';
+    setTimeout(()=>{ t.style.display='none'; }, 3000);
+}
+
+// Auto-restore on page open
+window.addEventListener('load', ()=>{
+    try {
+        const raw = localStorage.getItem(LS_KEY);
+        if(!raw) return;
+        const saved = JSON.parse(raw);
+        // Valid for 30 minutes
+        if(Date.now() - saved.ts > 30*60*1000){ localStorage.removeItem(LS_KEY); return; }
+        const d = saved.data;
+        // Only restore if we actually have channels
+        if(!d || !d.total || d.total === 0){ localStorage.removeItem(LS_KEY); return; }
+        if(d.by_niche){
+            renderAllResults(d);
+            showResults();
+        }
+    } catch(e){ localStorage.removeItem(LS_KEY); }
+});
+
+function renderAllResults(d){
+    document.getElementById('rTotal').textContent = d.total;
+    document.getElementById('rTop').textContent = (d.channels&&d.channels.length) ? d.channels[0].subs_fmt : '-';
+    document.getElementById('singleInfo').style.display='none';
+    showMashvara(d.by_niche);
+
+    const fr = document.getElementById('filterRow');
+    fr.style.display='flex';
+    fr.innerHTML='<button class="fpill on" onclick="filterSec(\'all\',this)">All</button>';
+    (d.by_niche||[]).forEach(n=>{
+        if(!n.channels.length) return;
+        const p=document.createElement('button');
+        p.className='fpill';
+        p.textContent=n.icon+' '+n.name.split(' ').slice(0,2).join(' ')+' ('+n.channels.length+')';
+        p.onclick=()=>filterSec(n.id,p);
+        fr.appendChild(p);
+    });
+
+    const rc = document.getElementById('resultsContent');
+    rc.innerHTML='';
+    if(d.channels&&d.channels.length){
+        rc.innerHTML+=`<div class="niche-sec" id="all-top">
+            <div class="sec-hd"><h3>&#127942; Top Growing Channels — Sab Niches</h3><span class="cnt-badge">${d.total}</span></div>
+            <div class="ch-grid">${d.channels.slice(0,24).map(card).join('')}</div>
+        </div>`;
+    }
+    (d.by_niche||[]).forEach(n=>{
+        if(!n.channels.length) return;
+        const compClr = n.competition.color;
+        rc.innerHTML+=`<div class="niche-sec" id="sec-${n.id}">
+            <div class="niche-sec-hd" style="background:${n.color}0d;border-left-color:${n.color}">
+                <span style="font-size:1.3rem">${n.icon}</span>
+                <h3>${n.name}</h3>
+                <span class="cnt-badge" style="background:${n.color}">${n.channels.length}</span>
+                <span class="comp" style="background:${compClr}18;border:1px solid ${compClr}33;color:${compClr}">${n.competition.level} Competition</span>
+            </div>
+            <div style="background:#0d1a0d;border:1px solid #1a3a1a;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.75rem;color:#88bb88;line-height:1.6">
+                <b style="color:#44dd66">Start Kaise Karo:</b> ${n.advice}
+            </div>
+            <div class="ch-grid">${n.channels.map(card).join('')}</div>
+        </div>`;
+    });
+}
+</script>
+</body>
+</html>
